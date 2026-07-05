@@ -18,13 +18,18 @@ def _find_ffmpeg() -> Path:
     for p in winget_bin.glob("Gyan.FFmpeg*/**/bin"):
         if (p / "ffmpeg.exe").exists():
             return p
+    # Fallback: check fresh install at C:\ffmpeg\bin
+    if Path(r"C:\ffmpeg\bin\ffmpeg.exe").exists():
+        return Path(r"C:\ffmpeg\bin")
     raise RuntimeError("FFmpeg not found.")
 
 FFMPEG_DIR = _find_ffmpeg()
 FFMPEG     = FFMPEG_DIR / "ffmpeg.exe"
 FFPROBE    = FFMPEG_DIR / "ffprobe.exe"
 
-VIDEO_DURATION = 90   # 1.5 minutes
+VIDEO_DURATION = 900    # final video length: 15 minutes — YouTube free account standard
+LOOP_SECONDS   = 180    # length of the seamless audio segment we generate in RAM;
+                        # FFmpeg loops it to fill VIDEO_DURATION (keeps memory low)
 W, H = 1280, 720
 
 # Rotating moods — one per day
@@ -39,17 +44,19 @@ LOFI_MOODS = [
     ("Dreamy Night",     "dreamy lofi, ethereal, ambient, soft synth, floating, peaceful, stars, 66 bpm"),
     ("Autumn Walk",      "autumn lofi, melancholic, acoustic, leaves, warm, introspective, 69 bpm"),
     ("Midnight Rain",    "midnight lofi, rain, jazz piano, moody, cinematic, emotional, 67 bpm"),
+    ("Slow Jazz",        "slow jazz, mellow saxophone, brushed drums, upright bass, warm jazz piano, smoky late night jazz club, relaxing music for quiet souls, peaceful, 60 bpm"),
 ]
 
 VISUAL_KEYWORDS = [
-    "cozy room rainy window bokeh",
-    "coffee shop window condensation evening",
-    "night city street rain neon lights",
-    "study desk lamp books night",
-    "fireplace warm living room winter",
-    "autumn leaves falling forest path",
-    "cafe window table cup coffee",
-    "bedroom fairy lights dark aesthetic",
-    "rainy window drops bokeh blur",
-    "misty forest morning light fog",
+    "cozy cottage window rain countryside warm candle",
+    "misty forest ancient trees ethereal soft light",
+    "train window countryside golden hour landscape",
+    "canal town evening lanterns reflection water",
+    "meadow wildflowers morning mist sunrise",
+    "old library warm lamp wooden books reading",
+    "harbor small boats morning calm misty",
+    "japanese countryside rice fields mountains peaceful",
+    "garden path green lush peaceful sunlight",
+    "countryside aerial green hills village soft light",
+    "dim jazz club candlelit table warm wooden bar night cozy",
 ]
